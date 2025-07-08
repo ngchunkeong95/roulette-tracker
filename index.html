@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Roulette Dozen Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f8f8f8;
+      max-width: 400px;
+      margin: auto;
+    }
+    h2 { color: #d00000; }
+    input, button {
+      font-size: 18px;
+      padding: 8px;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .results {
+      margin-top: 20px;
+      font-size: 18px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h2>🎰 Roulette Dozen Tracker</h2>
+  <p>Enter the number (0–36) after each spin:</p>
+  <input type="number" id="numberInput" placeholder="Enter roulette number">
+  <button onclick="addNumber()">Submit</button>
+  <div class="results" id="resultBox"></div>
+
+  <script>
+    const recentNumbers = [];
+
+    function getDozen(number) {
+      if (number === 0) return "Zero";
+      if (number >= 1 && number <= 12) return "1st 12";
+      if (number >= 13 && number <= 24) return "2nd 12";
+      if (number >= 25 && number <= 36) return "3rd 12";
+      return "Invalid";
+    }
+
+    function addNumber() {
+      const input = document.getElementById("numberInput");
+      const value = parseInt(input.value);
+      if (isNaN(value) || value < 0 || value > 36) {
+        alert("Please enter a valid number between 0 and 36.");
+        return;
+      }
+
+      recentNumbers.push(value);
+      if (recentNumbers.length > 20) {
+        recentNumbers.shift();
+      }
+
+      updateDisplay();
+      input.value = "";
+    }
+
+    function updateDisplay() {
+      const counts = { "1st 12": 0, "2nd 12": 0, "3rd 12": 0, "Zero": 0 };
+      for (const num of recentNumbers) {
+        const dozen = getDozen(num);
+        if (counts[dozen] !== undefined) {
+          counts[dozen]++;
+        }
+      }
+
+      const nonZeroCounts = Object.entries(counts).filter(([k]) => k !== "Zero");
+      const sorted = nonZeroCounts.sort((a, b) => b[1] - a[1]);
+      const topTwo = sorted.slice(0, 2);
+
+      const resultBox = document.getElementById("resultBox");
+      resultBox.innerHTML = `
+        <strong>Last ${recentNumbers.length} numbers:</strong><br>
+        ${recentNumbers.join(", ")}<br><br>
+        <strong>Top 2 Dozens to Bet:</strong><br>
+        1️⃣ ${topTwo[0][0]} — ${topTwo[0][1]} hits<br>
+        2️⃣ ${topTwo[1][0]} — ${topTwo[1][1]} hits<br><br>
+        <strong>Dozen Counts:</strong><br>
+        1st 12: ${counts["1st 12"]} | 2nd 12: ${counts["2nd 12"]} | 3rd 12: ${counts["3rd 12"]} | Zero: ${counts["Zero"]}
+      `;
+    }
+  </script>
+</body>
+</html>
